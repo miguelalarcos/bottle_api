@@ -45,6 +45,9 @@ def catching(f):
         except ValidationError as e:
             response.status = 500
             return {'error': 'doc not valid: ' + str(e)}
+        except ArgumentError:
+            response.status = 500
+            return {'error': 'argument error'}
     return helper
 
 def current_user(): 
@@ -59,7 +62,23 @@ def current_payload():
 class ValidationError(Exception):
     pass
 
+class ArgumentError(Exception):
+    pass
+
 def api_get(resource):
+    def decorator(f):
+        @returns_json
+        @catching
+        def helper():
+            filter, limit, offset = f(**request.params)
+            ret = []
+            for doc in db[resource['collection']].find(filter).limit(limit).skip(offset):
+                ret.append(doc)
+            return ret
+        return helper
+    return decorator
+
+def api_get_one(resource):
     def decorator(f):
         @returns_json
         @catching

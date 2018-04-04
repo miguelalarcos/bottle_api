@@ -1,5 +1,5 @@
 from bottle import run, route, get, post, put, debug, response, request, default_app
-from core import api_get, api_post, api_put
+from core import api_get, api_get_one, api_post, api_put, ArgumentError
 
 people_resource = {
     'collection': 'people',
@@ -7,9 +7,16 @@ people_resource = {
 }
 
 @get('/person/<id>')
-@api_get(people_resource)
+@api_get_one(people_resource)
 def get_person(id):
     pass
+
+@get('/people')
+@api_get(people_resource)
+def get_people(name=None, **kwargs):
+    if name is None:
+        raise ArgumentError()
+    return {'name': {'$regex':'^'+name}}, 5, 0
 
 @post('/people')
 @api_post(people_resource)
