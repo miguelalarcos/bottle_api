@@ -116,6 +116,25 @@ def has_role(role):
         return helper 
     return decorator
 
+def api_post_sub(resource, role=None):
+    def decorator(f):
+        @returns_json
+        @catching
+        @has_role(role)
+        def helper(id):
+            user = current_user()
+            payload = current_payload()
+            if not v.validate(payload, resource['schema']):
+                raise ValidationError(v._errors)
+            ret = f(id, payload) or payload
+            ret['_id'] = objectid.ObjectId()
+            path = resource['path']
+            db[resource['collection']].update_one({'_id': objectid.ObjectId(id), 'owner': user}, {'$push': {path: ret}})
+            response.status = 200
+            return ret
+        return helper
+    return decorator
+
 def api_post(resource, role=None):
     def decorator(f):
         @returns_json
@@ -130,11 +149,33 @@ def api_post(resource, role=None):
             payload['owner'] = user
             payload['created_at'] = time.time()
             ret = f(payload) or payload
-            print(ret)
             db[resource['collection']].insert_one(ret)
-            print(ret)
             response.status = 200
             return ret
+        return helper
+    return decorator
+
+def api_put_sub(resource, role=None):
+    def decorator(f):
+        @returns_json
+        @catching
+        @has_role(role)
+        def helper(id1, id2):
+            user = current_user()
+            payload = current_payload()
+            if not v.validate(payload, resource['schema']):
+                raise ValidationError(v._errors)
+            ret_ = f(id1, id2, payload) or payload
+            ret = {}
+            path = resource['path']
+            for key, value in ret_.items():
+                ret[path + '.$.' + key] = value
+            o = db[resource['collection']].find_one({'_id': objectid.ObjectId(id1), 'owner': user})
+            print('*'*30)
+            print(o)                
+            db[resource['collection']].update_one({'_id': objectid.ObjectId(id1), 'owner': user, path + '._id': objectid.ObjectId(id2)}, {'$set': ret})
+            response.status = 200
+            return ret_
         return helper
     return decorator
 
