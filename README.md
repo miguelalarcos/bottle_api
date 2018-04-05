@@ -1,3 +1,6 @@
+This is what you can do with this library:
+
+```python
 from bottle import run, route, get, post, put, debug, response, request, default_app
 from core import api_get, api_get_one, api_post, api_put, ArgumentError
 
@@ -32,3 +35,4 @@ application = default_app()
 if __name__ == '__main__':
     debug(True)
     run(reloader=True)
+```

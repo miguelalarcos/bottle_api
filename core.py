@@ -16,7 +16,7 @@ v = Validator()
 
 JWT_SECRET = 'secret'
 JWT_ALGORITHM = 'HS256'
-print(jwt.encode({'user': os.getenv('USER')}, JWT_SECRET, algorithm=JWT_ALGORITHM))
+print(jwt.encode({'user': os.getenv('USER'), 'roles': ['user', 'admin']}, JWT_SECRET, algorithm=JWT_ALGORITHM))
 
 # https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 def dumps(obj):
@@ -48,7 +48,16 @@ def catching(f):
         except ArgumentError:
             response.status = 500
             return {'error': 'argument error'}
+        except RoleError:
+            response.status = 500
+            return {'error': 'role error'}
     return helper
+
+
+def from_jwt():
+    jwt_token = request.headers.get('Authorization')
+    jwt_payload = jwt.decode(jwt_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    return jwt_payload.get('user'), jwt_payload.get('roles')
 
 def current_user(): 
     jwt_token = request.headers.get('Authorization')
@@ -65,6 +74,9 @@ class ValidationError(Exception):
 class ArgumentError(Exception):
     pass
 
+class RoleError(Exception):
+    pass
+
 def api_get(resource):
     def decorator(f):
         @returns_json
@@ -78,10 +90,11 @@ def api_get(resource):
         return helper
     return decorator
 
-def api_get_one(resource):
+def api_get_one(resource, role=None):
     def decorator(f):
         @returns_json
         @catching
+        @has_role(role)
         def helper(id):
             user = current_user()
             response.status = 200
@@ -93,10 +106,21 @@ def api_get_one(resource):
         return helper
     return decorator
 
-def api_post(resource):
+def has_role(role):
+    def decorator(f):
+        def helper(*args, **kwargs):
+            user, roles = from_jwt()
+            if role and role not in roles:
+                raise RoleError()
+            return f(*args, **kwargs)   
+        return helper 
+    return decorator
+
+def api_post(resource, role=None):
     def decorator(f):
         @returns_json
         @catching
+        @has_role(role)
         def helper():
             payload = current_payload()
             user = current_user()
@@ -114,10 +138,11 @@ def api_post(resource):
         return helper
     return decorator
 
-def api_put(resource):
+def api_put(resource, role=None):
     def decorator(f):
         @returns_json
         @catching
+        @has_role(role)
         def helper(id):
             payload = current_payload()
             payload.pop('user', None)
