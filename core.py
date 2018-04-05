@@ -10,13 +10,13 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 load_dotenv(verbose=True)
 
-db = MongoClient()['test_database']
+db = MongoClient(os.getenv('MONGO_URI'))[os.getenv('DATABASE')]
 
 v = Validator()
 
-JWT_SECRET = 'secret'
+JWT_SECRET = os.getenv('JWT_SECRET')
 JWT_ALGORITHM = 'HS256'
-print(jwt.encode({'user': os.getenv('USER'), 'roles': ['user', 'admin']}, JWT_SECRET, algorithm=JWT_ALGORITHM))
+print(jwt.encode({'user': 'miguel', 'roles': ['user', 'admin']}, JWT_SECRET, algorithm=JWT_ALGORITHM))
 
 # https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 def dumps(obj):
@@ -77,10 +77,12 @@ class ArgumentError(Exception):
 class RoleError(Exception):
     pass
 
-def api_get(resource):
+def api_get(route, resource, role=None):
     def decorator(f):
+        @get(route)
         @returns_json
         @catching
+        @has_role(role)
         def helper():
             filter, limit, offset = f(**request.params)
             ret = []
@@ -90,8 +92,9 @@ def api_get(resource):
         return helper
     return decorator
 
-def api_get_one(resource, role=None):
+def api_get_one(route, resource, role=None):
     def decorator(f):
+        @get(route)
         @returns_json
         @catching
         @has_role(role)
@@ -116,8 +119,9 @@ def has_role(role):
         return helper 
     return decorator
 
-def api_post_sub(resource, role=None):
+def api_post_sub(route, resource, role=None):
     def decorator(f):
+        @post(route)
         @returns_json
         @catching
         @has_role(role)
@@ -135,8 +139,9 @@ def api_post_sub(resource, role=None):
         return helper
     return decorator
 
-def api_post(resource, role=None):
+def api_post(route, resource, role=None):
     def decorator(f):
+        @post(route)
         @returns_json
         @catching
         @has_role(role)
@@ -155,8 +160,9 @@ def api_post(resource, role=None):
         return helper
     return decorator
 
-def api_put_sub(resource, role=None):
+def api_put_sub(route, resource, role=None):
     def decorator(f):
+        @put(route)
         @returns_json
         @catching
         @has_role(role)
@@ -176,8 +182,9 @@ def api_put_sub(resource, role=None):
         return helper
     return decorator
 
-def api_put(resource, role=None):
+def api_put(route, resource, role=None):
     def decorator(f):
+        @put(route)
         @returns_json
         @catching
         @has_role(role)

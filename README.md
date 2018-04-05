@@ -15,36 +15,30 @@ comments_resource = {
     'schema': {'text': {'type': 'string'}}
 }
 
-@get('/person/<id>')
-@api_get_one(people_resource)
+@api_get_one('/person/<id>', people_resource)
 def get_person(id): # this function is never called
     pass
 
-@get('/people')
-@api_get(people_resource)
+@api_get('/people', people_resource)
 def get_people(name=None, **kwargs):
     if name is None:
         raise ArgumentError()
     return {'name': {'$regex':'^'+name}}, 5, 0
 
-@post('/people')
-@api_post(people_resource, role='admin')
+@api_post('/people', people_resource, role='admin')
 def post_people(payload):
     payload['mr_name'] = 'Mr. ' + payload['name']
     return payload
 
-@put('/person/<id>')
-@api_put(people_resource)
+@api_put('/person/<id>', people_resource)
 def put_person(id, payload):
     pass
 
-@post('/person/<id>/comments')
-@api_post_sub(comments_resource)
+@api_post_sub('/person/<id>/comments', comments_resource)
 def post_comment(id, payload):
     pass
 
-@put('/person/<id1>/comment/<id2>')
-@api_put_sub(comments_resource)
+@api_put_sub('/person/<id1>/comment/<id2>', comments_resource)
 def put_comment(id1, id2, payload):
     pass
 
@@ -52,4 +46,5 @@ application = default_app()
 if __name__ == '__main__':
     debug(True)
     run(reloader=True)
+
 ```
