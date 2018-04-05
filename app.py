@@ -14,7 +14,7 @@ comments_resource = {
 
 @get('/person/<id>')
 @api_get_one(people_resource)
-def get_person(id):
+def get_person(id): # this function is never called
     pass
 
 @get('/people')
@@ -27,7 +27,8 @@ def get_people(name=None, **kwargs):
 @post('/people')
 @api_post(people_resource, role='admin')
 def post_people(payload):
-    pass
+    payload['mr_name'] = 'Mr. ' + payload['name']
+    return payload
 
 @put('/person/<id>')
 @api_put(people_resource)

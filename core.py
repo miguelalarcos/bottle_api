@@ -169,10 +169,7 @@ def api_put_sub(resource, role=None):
             ret = {}
             path = resource['path']
             for key, value in ret_.items():
-                ret[path + '.$.' + key] = value
-            o = db[resource['collection']].find_one({'_id': objectid.ObjectId(id1), 'owner': user})
-            print('*'*30)
-            print(o)                
+                ret[path + '.$.' + key] = value           
             db[resource['collection']].update_one({'_id': objectid.ObjectId(id1), 'owner': user, path + '._id': objectid.ObjectId(id2)}, {'$set': ret})
             response.status = 200
             return ret_
