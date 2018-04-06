@@ -2,7 +2,7 @@ This is what you can do with this library:
 
 ```python
 from bottle import run, route, get, post, put, debug, response, request, default_app
-from core import api_get, api_get_one, api_post, api_put, api_post_sub, api_put_sub, ArgumentError
+from core import api_get, api_get_one, api_post, api_put, api_post_sub, api_put_sub, ArgumentError, current_user
 
 people_resource = {
     'collection': 'people',
@@ -16,7 +16,7 @@ comments_resource = {
 }
 
 @api_get_one('/person/<id>', people_resource)
-def get_person(id): # this function is never called
+def get_person(id, doc):
     pass
 
 @api_get('/people', people_resource)
@@ -42,9 +42,17 @@ def post_comment(id, payload):
 def put_comment(id1, id2, payload):
     pass
 
+#api_get_one is public, i.e. does not check if you are the owner of the doc
+@api_get_one('/comments-of-person/<id>', people_resource)
+def get_comments(id, doc):
+    user = current_user()
+    lista = [comment for comment in doc['comments'] if comment['writer'] == user or comment['respond_to'] == user]
+    doc['comments'] = lista
+    return doc
+
 application = default_app()
 if __name__ == '__main__':
     debug(True)
     run(reloader=True)
-
+    run()
 ```
