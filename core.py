@@ -101,11 +101,12 @@ def api_get_one(route, resource, role=None):
         def helper(id):
             user = current_user()
             response.status = 200
-            ret = f(id)
+            doc = db[resource['collection']].find_one({'_id': objectid.ObjectId(id)})
+            ret = f(id, doc)
             if ret:
                 return ret
             else:
-                return db[resource['collection']].find_one({'_id': objectid.ObjectId(id), 'owner': user})
+                return doc 
         return helper
     return decorator
 
@@ -133,7 +134,12 @@ def api_post_sub(route, resource, role=None):
             ret = f(id, payload) or payload
             ret['_id'] = objectid.ObjectId()
             path = resource['path']
-            db[resource['collection']].update_one({'_id': objectid.ObjectId(id), 'owner': user}, {'$push': {path: ret}})
+            owner = resource.get('owner', True)
+            if owner:
+                filter = {'_id': objectid.ObjectId(id), 'owner': user}
+            else:
+                filter = {'_id': objectid.ObjectId(id)}
+            db[resource['collection']].update_one(filter, {'$push': {path: ret}})
             response.status = 200
             return ret
         return helper
