@@ -56,3 +56,6 @@ if __name__ == '__main__':
     run(reloader=True)
     run()
 ```
+
+gets are public
+put only does if you are the owner of the doc
