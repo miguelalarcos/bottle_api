@@ -68,4 +68,4 @@ sub means subresource, i.e. an array
 
 .
 
-coin
+let
