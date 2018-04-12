@@ -68,12 +68,4 @@ sub means subresource, i.e. an array
 
 .
 
-a-1
-
-b-1
-
-c-1
-
-
-
-
+game
