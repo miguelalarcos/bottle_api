@@ -68,11 +68,11 @@ sub means subresource, i.e. an array
 
 .
 
-a1
+a-1
 
-b2
+b-1
 
-c3
+c-1
 
 
 
