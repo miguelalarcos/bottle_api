@@ -36,6 +36,7 @@ def put_person(id, payload):
 
 @api_post_sub('/person/<id>/comments', comments_resource)
 def post_comment(id, payload):
+
     pass
 
 @api_put_sub('/person/<id1>/comment/<id2>', comments_resource)
@@ -64,4 +65,11 @@ put only does if you are the owner of the doc
 post add an owner field
 
 sub means subresource, i.e. an array
+
+.
+
+a
+
+b
+
 
