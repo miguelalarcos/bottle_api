@@ -66,11 +66,3 @@ post add an owner field
 
 sub means subresource, i.e. an array
 
-.
-1
-
-x
-
-2
-
-ah!
