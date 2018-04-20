@@ -67,4 +67,5 @@ post add an owner field
 sub means subresource, i.e. an array
 
 conflict --- (a)
+conflict ---(b)
 
